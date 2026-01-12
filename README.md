@@ -3,569 +3,644 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Task Manager</title>
+    <title>NFT Case Opener</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
-        :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-gradient-1: #4f46e5;
-            --bg-gradient-2: #8b5cf6;
-            --bg-gradient-3: #ec4899;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --text-main: #1e293b;
-            --text-secondary: #64748b;
-            --danger: #ef4444;
-            --success: #10b981;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .dark-mode {
-            --primary: #818cf8;
-            --primary-hover: #6366f1;
-            --bg-gradient-1: #0f172a;
-            --bg-gradient-2: #1e293b;
-            --bg-gradient-3: #334155;
-            --glass-bg: rgba(30, 41, 59, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        * { box-sizing: border-box; outline: none; }
         body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3));
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-main);
-            transition: color 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* --- 2. MAIN CONTAINER (GLASS) --- */
-        .app-container {
-            width: 90%;
+        .container {
             max-width: 500px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            transform: translateY(0);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            z-index: 10;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        /* --- 3. HEADER & CONTROLS --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
         }
 
-        h1 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, var(--primary), #ec4899);
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--text-main);
-            transition: transform 0.5s;
-            padding: 5px;
-            border-radius: 50%;
-        }
-        .theme-toggle:hover { background: rgba(0,0,0,0.05); }
-
-        /* Progress Bar */
-        .progress-container {
-            margin-bottom: 2rem;
-        }
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+        .balance {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
             font-weight: 600;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .progress-bar-bg {
-            height: 8px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
+
+        .coin-icon {
+            font-size: 24px;
+            animation: spin 3s linear infinite;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 350px;
+            margin: 20px 0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .case-price {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+
+        .open-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .open-button:active {
+            transform: scale(0.95);
+        }
+
+        .open-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .reveal-container {
+            text-align: center;
+            animation: scaleIn 0.5s ease;
+        }
+
+        #nft-canvas {
+            width: 300px;
+            height: 300px;
+            border-radius: 20px;
+            margin: 0 auto;
+        }
+
+        .nft-info {
+            margin-top: 30px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        .nft-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .nft-rarity {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .rarity-common { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+        .rarity-rare { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .rarity-epic { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .rarity-legendary { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+        .close-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .inventory {
+            margin-top: 40px;
+        }
+
+        .inventory h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .inventory-item {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
             overflow: hidden;
         }
-        .dark-mode .progress-bar-bg { background: rgba(255,255,255,0.1); }
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--primary), #ec4899);
-            border-radius: 10px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .inventory-item:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.1);
         }
 
-        /* Input Area */
-        .input-group {
-            position: relative;
-            display: flex;
-            gap: 10px;
-            margin-bottom: 2rem;
-        }
-
-        input[type="text"] {
+        .inventory-item img {
             width: 100%;
-            padding: 16px 20px;
-            border-radius: 16px;
-            border: 2px solid transparent;
-            background: rgba(255,255,255,0.5);
-            font-size: 1rem;
-            color: var(--text-main);
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        .dark-mode input[type="text"] { background: rgba(0,0,0,0.2); }
-
-        input[type="text"]:focus {
-            background: rgba(255,255,255,0.9);
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-        }
-        .dark-mode input[type="text"]:focus { background: rgba(0,0,0,0.4); }
-
-        .add-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 0 24px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-        .add-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .add-btn:active { transform: translateY(0); }
-
-        /* Filter Tabs */
-        .filters {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-        .filter-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s;
-        }
-        .filter-btn.active {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary);
-        }
-        .dark-mode .filter-btn.active { background: rgba(129, 140, 248, 0.2); }
-
-        /* --- 4. TASK LIST --- */
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        /* Custom Scrollbar */
-        ul::-webkit-scrollbar { width: 6px; }
-        ul::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-        .dark-mode ul::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-
-        .task-item {
-            background: rgba(255,255,255,0.4);
-            margin-bottom: 12px;
-            padding: 16px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
-            animation: slideIn 0.3s ease forwards;
-        }
-        .dark-mode .task-item { background: rgba(255,255,255,0.03); }
-
-        .task-item:hover {
-            transform: translateX(4px);
-            border-color: rgba(99, 102, 241, 0.3);
-            background: rgba(255,255,255,0.6);
-        }
-        .dark-mode .task-item:hover { background: rgba(255,255,255,0.07); }
-
-        .task-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-grow: 1;
-            cursor: pointer;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
 
-        .task-text {
-            font-size: 1rem;
-            transition: all 0.3s;
-            word-break: break-all;
-        }
-
-        .completed .task-text {
-            text-decoration: line-through;
-            color: var(--text-secondary);
-            opacity: 0.7;
-        }
-
-        /* Custom Checkbox */
-        .checkbox {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-        .completed .checkbox {
-            background: var(--primary);
-            transform: scale(1.1);
-        }
-        .checkbox::after {
-            content: '✓';
-            color: white;
+        .inventory-item .name {
             font-size: 14px;
-            display: none;
-        }
-        .completed .checkbox::after { display: block; }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            opacity: 0;
-            margin-left: 10px;
-        }
-        .task-item:hover .delete-btn { opacity: 1; }
-        .delete-btn:hover {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
+            font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        .empty-state {
-            text-align: center;
-            color: var(--text-secondary);
-            margin-top: 2rem;
-            display: none;
-        }
-        .empty-state img { width: 120px; opacity: 0.5; margin-bottom: 1rem; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes deleteAnim {
-            to { opacity: 0; transform: translateX(50px); height: 0; margin: 0; padding: 0; }
+        .inventory-item .value {
+            font-size: 12px;
+            opacity: 0.8;
         }
 
-        /* Confetti Canvas */
-        #confetti-canvas {
+        .particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 100;
+            z-index: 999;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            animation: particleFall 3s linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes particleFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(360deg);
+            }
         }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
 
-    <canvas id="confetti-canvas"></canvas>
-
-    <div class="app-container">
-        <header>
-            <h1>Мои Задачи</h1>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
-        </header>
-
-        <div class="progress-container">
-            <div class="progress-info">
-                <span id="progress-text">Прогресс</span>
-                <span id="progress-percent">0%</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progressBar"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 NFT MYSTERY BOX</h1>
+            <div class="balance">
+                <span class="coin-icon">💎</span>
+                <span id="balance">1000</span>
             </div>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="taskInput" placeholder="Что нужно сделать сегодня?">
-            <button class="add-btn" id="addBtn">+</button>
+        <div id="canvas-container">
+            <div class="case-price">💎 100</div>
         </div>
 
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">Все</button>
-            <button class="filter-btn" data-filter="active">В процессе</button>
-            <button class="filter-btn" data-filter="completed">Готово</button>
+        <button class="open-button" id="openButton">Открыть кейс</button>
+
+        <div class="inventory">
+            <h2>📦 Моя коллекция</h2>
+            <div class="inventory-grid" id="inventoryGrid"></div>
         </div>
+    </div>
 
-        <ul id="taskList">
-            </ul>
-
-        <div class="empty-state" id="emptyState">
-            <div style="font-size: 3rem;">📝</div>
-            <p>Задач пока нет. Добавь первую!</p>
+    <div class="overlay" id="overlay">
+        <div class="reveal-container">
+            <div id="nft-canvas"></div>
+            <div class="nft-info" id="nftInfo"></div>
         </div>
     </div>
 
     <script>
-        /* --- JAVASCRIPT LOGIC --- */
+        let tg = window.Telegram.WebApp;
+        tg.expand();
 
-        // Elements
-        const taskInput = document.getElementById('taskInput');
-        const addBtn = document.getElementById('addBtn');
-        const taskList = document.getElementById('taskList');
-        const emptyState = document.getElementById('emptyState');
-        const progressBar = document.getElementById('progressBar');
-        const progressPercent = document.getElementById('progressPercent');
-        const themeToggle = document.getElementById('themeToggle');
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        let balance = 1000;
+        let inventory = [];
+        let db;
+        let scene, camera, renderer, caseModel;
+        let nftScene, nftCamera, nftRenderer, nftModel;
 
-        // State
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        let currentFilter = 'all';
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderTasks();
-            updateStats();
-            applyTheme();
-        });
-
-        // --- THEME ---
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            themeToggle.textContent = isDark ? '☀️' : '🌙';
-        });
-
-        function applyTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-                themeToggle.textContent = '☀️';
+        const nftItems = [
+            { 
+                name: 'Anonymous Telegram', 
+                rarity: 'common', 
+                value: 50,
+                image: 'https://nft.fragment.com/preview/anonymous.jpg',
+                color: 0x95a5a6
+            },
+            { 
+                name: 'Telegram Premium', 
+                rarity: 'common', 
+                value: 50,
+                image: 'https://nft.fragment.com/preview/premium.jpg',
+                color: 0x3498db
+            },
+            { 
+                name: 'Raccoon', 
+                rarity: 'rare', 
+                value: 150,
+                image: 'https://nft.fragment.com/preview/raccoon.jpg',
+                color: 0x8e44ad
+            },
+            { 
+                name: 'Pepe', 
+                rarity: 'rare', 
+                value: 150,
+                image: 'https://nft.fragment.com/preview/pepe.jpg',
+                color: 0x27ae60
+            },
+            { 
+                name: 'Duck', 
+                rarity: 'epic', 
+                value: 300,
+                image: 'https://nft.fragment.com/preview/duck.jpg',
+                color: 0xf39c12
+            },
+            { 
+                name: 'Tiger', 
+                rarity: 'epic', 
+                value: 300,
+                image: 'https://nft.fragment.com/preview/tiger.jpg',
+                color: 0xe67e22
+            },
+            { 
+                name: 'Gotham', 
+                rarity: 'legendary', 
+                value: 500,
+                image: 'https://nft.fragment.com/preview/gotham.jpg',
+                color: 0x1a1a2e
+            },
+            { 
+                name: 'Founder', 
+                rarity: 'legendary', 
+                value: 500,
+                image: 'https://nft.fragment.com/preview/founder.jpg',
+                color: 0xe74c3c
             }
+        ];
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('NFTGameDB', 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('gameData')) {
+                        db.createObjectStore('gameData', { keyPath: 'key' });
+                    }
+                };
+            });
         }
 
-        // --- ADD TASK ---
-        function addTask() {
-            const text = taskInput.value.trim();
-            if (!text) return;
-
-            const newTask = {
-                id: Date.now(),
-                text: text,
-                completed: false,
-                createdAt: new Date().toISOString()
-            };
-
-            tasks.unshift(newTask); // Add to top
-            saveAndRender();
-            taskInput.value = '';
-            taskInput.focus();
+        async function saveData() {
+            const transaction = db.transaction(['gameData'], 'readwrite');
+            const store = transaction.objectStore('gameData');
+            
+            await store.put({ key: 'balance', value: balance });
+            await store.put({ key: 'inventory', value: inventory });
         }
 
-        addBtn.addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTask();
-        });
-
-        // --- TOGGLE & DELETE ---
-        window.toggleTask = function(id) {
-            tasks = tasks.map(task => {
-                if (task.id === id) {
-                    const newStatus = !task.completed;
-                    if(newStatus) fireConfetti(); // Boom!
-                    return { ...task, completed: newStatus };
+        async function loadData() {
+            const transaction = db.transaction(['gameData'], 'readonly');
+            const store = transaction.objectStore('gameData');
+            
+            const balanceReq = store.get('balance');
+            const inventoryReq = store.get('inventory');
+            
+            balanceReq.onsuccess = () => {
+                if (balanceReq.result) {
+                    balance = balanceReq.result.value;
+                    updateBalance();
                 }
-                return task;
-            });
-            saveAndRender();
-        };
-
-        window.deleteTask = function(id) {
-            const taskEl = document.querySelector(`li[data-id="${id}"]`);
-            if(taskEl) {
-                taskEl.style.animation = 'deleteAnim 0.4s forwards';
-                setTimeout(() => {
-                    tasks = tasks.filter(task => task.id !== id);
-                    saveAndRender();
-                }, 400);
-            }
-        };
-
-        // --- FILTERS ---
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                renderTasks();
-            });
-        });
-
-        // --- RENDER ---
-        function saveAndRender() {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            renderTasks();
-            updateStats();
-        }
-
-        function renderTasks() {
-            taskList.innerHTML = '';
+            };
             
-            let filteredTasks = tasks;
-            if (currentFilter === 'active') filteredTasks = tasks.filter(t => !t.completed);
-            if (currentFilter === 'completed') filteredTasks = tasks.filter(t => t.completed);
-
-            if (filteredTasks.length === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-                filteredTasks.forEach(task => {
-                    const li = document.createElement('li');
-                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                    li.dataset.id = task.id;
-                    li.innerHTML = `
-                        <div class="task-content" onclick="toggleTask(${task.id})">
-                            <div class="checkbox"></div>
-                            <span class="task-text">${escapeHtml(task.text)}</span>
-                        </div>
-                        <button class="delete-btn" onclick="deleteTask(${task.id})">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    `;
-                    taskList.appendChild(li);
-                });
-            }
+            inventoryReq.onsuccess = () => {
+                if (inventoryReq.result) {
+                    inventory = inventoryReq.result.value;
+                    updateInventory();
+                }
+            };
         }
 
-        function updateStats() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+        function init3DCase() {
+            const container = document.getElementById('canvas-container');
             
-            progressBar.style.width = `${percent}%`;
-            progressPercent.textContent = `${percent}%`;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry(2, 2, 2);
+            const materials = [
+                new THREE.MeshPhongMaterial({ color: 0x667eea, shininess: 100 }),
+                new THREE.MeshPhongMaterial({ color: 0x764ba2, shininess: 100 }),
+                new THREE.MeshPhongMaterial({ color: 0x667eea, shininess: 100 }),
+                new THREE.MeshPhongMaterial({ color: 0x764ba2, shininess: 100 }),
+                new THREE.MeshPhongMaterial({ color: 0x667eea, shininess: 100 }),
+                new THREE.MeshPhongMaterial({ color: 0x764ba2, shininess: 100 })
+            ];
+            
+            caseModel = new THREE.Mesh(geometry, materials);
+            scene.add(caseModel);
+
+            const light1 = new THREE.PointLight(0xffffff, 1, 100);
+            light1.position.set(5, 5, 5);
+            scene.add(light1);
+
+            const light2 = new THREE.PointLight(0x667eea, 0.5, 100);
+            light2.position.set(-5, -5, 5);
+            scene.add(light2);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            camera.position.z = 5;
+
+            animate3DCase();
         }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        function animate3DCase() {
+            requestAnimationFrame(animate3DCase);
+            
+            caseModel.rotation.x += 0.005;
+            caseModel.rotation.y += 0.01;
+            
+            renderer.render(scene, camera);
         }
 
-        // --- CONFETTI ENGINE (Pure JS, Lightweight) ---
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+        function init3DNFT(nftData) {
+            const container = document.getElementById('nft-canvas');
+            container.innerHTML = '';
+            
+            nftScene = new THREE.Scene();
+            nftCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+            nftRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            nftRenderer.setSize(300, 300);
+            nftRenderer.setClearColor(0x000000, 0);
+            container.appendChild(nftRenderer.domElement);
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            const geometry = new THREE.BoxGeometry(2.5, 3.5, 0.3);
+            const texture = new THREE.TextureLoader().load(nftData.image);
+            const material = new THREE.MeshPhongMaterial({ 
+                map: texture,
+                shininess: 100,
+                emissive: nftData.color,
+                emissiveIntensity: 0.2
+            });
+            
+            nftModel = new THREE.Mesh(geometry, material);
+            nftScene.add(nftModel);
+
+            const edgesGeometry = new THREE.EdgesGeometry(geometry);
+            const edgesMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            nftModel.add(edges);
+
+            const light1 = new THREE.PointLight(0xffffff, 1, 100);
+            light1.position.set(5, 5, 5);
+            nftScene.add(light1);
+
+            const light2 = new THREE.PointLight(nftData.color, 0.8, 100);
+            light2.position.set(-5, 0, 5);
+            nftScene.add(light2);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            nftScene.add(ambientLight);
+
+            nftCamera.position.z = 5;
+
+            animate3DNFT();
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        function fireConfetti() {
-            const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
-            // Create particles from center
-            for (let i = 0; i < 60; i++) {
-                particles.push({
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 20,
-                    vy: (Math.random() - 1) * 20,
-                    size: Math.random() * 8 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    life: 100,
-                    gravity: 0.5
-                });
+        function animate3DNFT() {
+            requestAnimationFrame(animate3DNFT);
+            
+            nftModel.rotation.y += 0.01;
+            
+            nftRenderer.render(nftScene, nftCamera);
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance;
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                container.appendChild(particle);
             }
-            if (!isAnimating) requestAnimationFrame(animateConfetti);
         }
 
-        let isAnimating = false;
-        function animateConfetti() {
-            if (particles.length === 0) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                isAnimating = false;
+        function openCase() {
+            if (balance < 100) {
+                tg.showAlert('Недостаточно монет! 💎');
                 return;
             }
-            isAnimating = true;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            for (let i = 0; i < particles.length; i++) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += p.gravity;
-                p.life -= 1.5;
-                p.size *= 0.98;
+            balance -= 100;
+            updateBalance();
+            
+            const openButton = document.getElementById('openButton');
+            openButton.disabled = true;
 
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.life / 100;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+            caseModel.rotation.x = 0;
+            caseModel.rotation.y = 0;
+            
+            let speed = 0.1;
+            const spinInterval = setInterval(() => {
+                caseModel.rotation.y += speed;
+                speed *= 1.05;
+            }, 16);
 
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                    i--;
-                }
-            }
-            requestAnimationFrame(animateConfetti);
+            tg.HapticFeedback.impactOccurred('heavy');
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                revealNFT();
+                openButton.disabled = false;
+            }, 2000);
         }
-    </script>
-</body>
-</html>
+
+        function revealNFT() {
+            const rand = Math.random();
+            let selectedNFT;
+
+            if (rand < 0.5) {
+                selectedNFT = nftItems.filter(i => i.rarity === 'common')[Math.floor(Math.random() * 2)];
+            } else if (rand < 0.8) {
+                selectedNFT = nftItems.filter(i => i.rarity === 'rare')[Math.floor(Math.random() * 2)];
+            } else if (rand < 0.95) {
+                selectedNFT = nftItems.filter(i => i.rarity === 'epic')[Math.floor(Math.random() * 2)];
+            } else {
+                selectedNFT = nftItems.filter(i => i.rarity === 'legendary')[Math.floor(Math.random() * 2)];
+            }
+
+            inventory.push({ ...selectedNFT, id: Date.now() });
+            saveData();
+            updateInventory();
+
+            const overlay = document.getElementById('overlay');
+            const nftInfo = document.getElementById('nftInfo');
+
+            const rarityNames = {
+                common: 'Обычный',
+                rare: 'Редкий',
+                epic: 'Эпический',
+                legendary: 'Легендарный'
+            };
+
+            init3DNFT(selecte
