@@ -3,399 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Задачник</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Ultimate Task Manager</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- 1. CORE VARIABLES & RESET --- */
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-gradient-1: #4f46e5;
+            --bg-gradient-2: #8b5cf6;
+            --bg-gradient-3: #ec4899;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
 
+        .dark-mode {
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --bg-gradient-1: #0f172a;
+            --bg-gradient-2: #1e293b;
+            --bg-gradient-3: #334155;
+            --glass-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; outline: none; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            padding: 16px;
-            padding-bottom: 80px;
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            transition: color 0.3s ease;
+            overflow-x: hidden;
         }
 
-        .header {
-            margin-bottom: 20px;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- 2. MAIN CONTAINER (GLASS) --- */
+        .app-container {
+            width: 90%;
+            max-width: 500px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- 3. HEADER & CONTROLS --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
         }
 
         h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, var(--primary), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .stats {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #999);
-        }
-
-        .add-task-form {
-            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        input[type="text"],
-        input[type="datetime-local"],
-        textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
-            border-radius: 8px;
-            font-size: 15px;
-            background: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
+        .theme-toggle {
+            background: none;
             border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            transition: transform 0.5s;
+            padding: 5px;
+            border-radius: 50%;
+        }
+        .theme-toggle:hover { background: rgba(0,0,0,0.05); }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .progress-bar-bg {
+            height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .dark-mode .progress-bar-bg { background: rgba(255,255,255,0.1); }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #ec4899);
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Input Area */
+        .input-group {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.5);
+            font-size: 1rem;
+            color: var(--text-main);
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .dark-mode input[type="text"] { background: rgba(0,0,0,0.2); }
+
+        input[type="text"]:focus {
+            background: rgba(255,255,255,0.9);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+        .dark-mode input[type="text"]:focus { background: rgba(0,0,0,0.4); }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 0 24px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        .add-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .add-btn:active { transform: translateY(0); }
+
+        /* Filter Tabs */
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .filter-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+        .dark-mode .filter-btn.active { background: rgba(129, 140, 248, 0.2); }
+
+        /* --- 4. TASK LIST --- */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        /* Custom Scrollbar */
+        ul::-webkit-scrollbar { width: 6px; }
+        ul::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .dark-mode ul::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+        .task-item {
+            background: rgba(255,255,255,0.4);
+            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            animation: slideIn 0.3s ease forwards;
+        }
+        .dark-mode .task-item { background: rgba(255,255,255,0.03); }
+
+        .task-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(255,255,255,0.6);
+        }
+        .dark-mode .task-item:hover { background: rgba(255,255,255,0.07); }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            cursor: pointer;
         }
 
-        .btn:active {
+        .task-text {
+            font-size: 1rem;
+            transition: all 0.3s;
+            word-break: break-all;
+        }
+
+        .completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-secondary);
             opacity: 0.7;
         }
 
-        .btn-primary {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #fff);
-        }
-
-        .tasks-list {
+        /* Custom Checkbox */
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
         }
-
-        .task-item {
-            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
-            padding: 14px;
-            border-radius: 12px;
-            display: flex;
-            gap: 12px;
-            align-items: start;
+        .completed .checkbox {
+            background: var(--primary);
+            transform: scale(1.1);
         }
-
-        .task-checkbox {
-            width: 20px;
-            height: 20px;
-            margin-top: 2px;
-            cursor: pointer;
-        }
-
-        .task-content {
-            flex: 1;
-        }
-
-        .task-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .task-deadline {
-            font-size: 13px;
-            color: var(--tg-theme-hint-color, #999);
-            margin-bottom: 4px;
-        }
-
-        .task-description {
-            font-size: 14px;
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        .task-item.completed .task-title,
-        .task-item.completed .task-description {
-            text-decoration: line-through;
-            opacity: 0.5;
-        }
-
-        .task-delete {
-            background: #ff3b30;
+        .checkbox::after {
+            content: '✓';
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
+            font-size: 14px;
+            display: none;
         }
+        .completed .checkbox::after { display: block; }
 
-        .overdue {
-            color: #ff3b30;
-            font-weight: 600;
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            opacity: 0;
+            margin-left: 10px;
+        }
+        .task-item:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--tg-theme-hint-color, #999);
+            color: var(--text-secondary);
+            margin-top: 2rem;
+            display: none;
+        }
+        .empty-state img { width: 120px; opacity: 0.5; margin-bottom: 1rem; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes deleteAnim {
+            to { opacity: 0; transform: translateX(50px); height: 0; margin: 0; padding: 0; }
         }
 
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .filter-tab {
-            flex: 1;
-            padding: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        .filter-tab.active {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #fff);
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📝 Мои задачи</h1>
-        <div class="stats" id="stats">Всего задач: 0</div>
-    </div>
 
-    <div class="add-task-form">
-        <div class="form-group">
-            <label for="taskTitle">Название задачи</label>
-            <input type="text" id="taskTitle" placeholder="Например: Купить продукты">
-        </div>
-        <div class="form-group">
-            <label for="taskDeadline">Срок выполнения</label>
-            <input type="datetime-local" id="taskDeadline">
-        </div>
-        <div class="form-group">
-            <label for="taskDesc">Описание (необязательно)</label>
-            <textarea id="taskDesc" placeholder="Детали задачи..."></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="addTask()">Добавить задачу</button>
-    </div>
+    <canvas id="confetti-canvas"></canvas>
 
-    <div class="filter-tabs">
-        <button class="filter-tab active" onclick="setFilter('all')">Все</button>
-        <button class="filter-tab" onclick="setFilter('active')">Активные</button>
-        <button class="filter-tab" onclick="setFilter('completed')">Завершённые</button>
-    </div>
+    <div class="app-container">
+        <header>
+            <h1>Мои Задачи</h1>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </header>
 
-    <div class="tasks-list" id="tasksList"></div>
+        <div class="progress-container">
+            <div class="progress-info">
+                <span id="progress-text">Прогресс</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Что нужно сделать сегодня?">
+            <button class="add-btn" id="addBtn">+</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="active">В процессе</button>
+            <button class="filter-btn" data-filter="completed">Готово</button>
+        </div>
+
+        <ul id="taskList">
+            </ul>
+
+        <div class="empty-state" id="emptyState">
+            <div style="font-size: 3rem;">📝</div>
+            <p>Задач пока нет. Добавь первую!</p>
+        </div>
+    </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        /* --- JAVASCRIPT LOGIC --- */
 
+        // Elements
+        const taskInput = document.getElementById('taskInput');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const emptyState = document.getElementById('emptyState');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const themeToggle = document.getElementById('themeToggle');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // State
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let currentFilter = 'all';
-        let db;
 
-        // Инициализация IndexedDB
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('TasksDB', 1);
-                
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-                
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('tasks')) {
-                        const store = db.createObjectStore('tasks', { keyPath: 'id', autoIncrement: true });
-                        store.createIndex('deadline', 'deadline', { unique: false });
-                        store.createIndex('completed', 'completed', { unique: false });
-                    }
-                };
-            });
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTasks();
+            updateStats();
+            applyTheme();
+        });
+
+        // --- THEME ---
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        });
+
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+            }
         }
 
-        // Добавить задачу
-        async function addTask() {
-            const title = document.getElementById('taskTitle').value.trim();
-            const deadline = document.getElementById('taskDeadline').value;
-            const description = document.getElementById('taskDesc').value.trim();
+        // --- ADD TASK ---
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (!text) return;
 
-            if (!title) {
-                tg.showAlert('Введите название задачи');
-                return;
-            }
-
-            if (!deadline) {
-                tg.showAlert('Укажите срок выполнения');
-                return;
-            }
-
-            const task = {
-                title,
-                deadline,
-                description,
+            const newTask = {
+                id: Date.now(),
+                text: text,
                 completed: false,
                 createdAt: new Date().toISOString()
             };
 
-            const transaction = db.transaction(['tasks'], 'readwrite');
-            const store = transaction.objectStore('tasks');
+            tasks.unshift(newTask); // Add to top
+            saveAndRender();
+            taskInput.value = '';
+            taskInput.focus();
+        }
+
+        addBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // --- TOGGLE & DELETE ---
+        window.toggleTask = function(id) {
+            tasks = tasks.map(task => {
+                if (task.id === id) {
+                    const newStatus = !task.completed;
+                    if(newStatus) fireConfetti(); // Boom!
+                    return { ...task, completed: newStatus };
+                }
+                return task;
+            });
+            saveAndRender();
+        };
+
+        window.deleteTask = function(id) {
+            const taskEl = document.querySelector(`li[data-id="${id}"]`);
+            if(taskEl) {
+                taskEl.style.animation = 'deleteAnim 0.4s forwards';
+                setTimeout(() => {
+                    tasks = tasks.filter(task => task.id !== id);
+                    saveAndRender();
+                }, 400);
+            }
+        };
+
+        // --- FILTERS ---
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderTasks();
+            });
+        });
+
+        // --- RENDER ---
+        function saveAndRender() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+            updateStats();
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
             
-            try {
-                await store.add(task);
-                document.getElementById('taskTitle').value = '';
-                document.getElementById('taskDeadline').value = '';
-                document.getElementById('taskDesc').value = '';
-                loadTasks();
-                tg.HapticFeedback.notificationOccurred('success');
-            } catch (error) {
-                tg.showAlert('Ошибка при добавлении задачи');
+            let filteredTasks = tasks;
+            if (currentFilter === 'active') filteredTasks = tasks.filter(t => !t.completed);
+            if (currentFilter === 'completed') filteredTasks = tasks.filter(t => t.completed);
+
+            if (filteredTasks.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                filteredTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.dataset.id = task.id;
+                    li.innerHTML = `
+                        <div class="task-content" onclick="toggleTask(${task.id})">
+                            <div class="checkbox"></div>
+                            <span class="task-text">${escapeHtml(task.text)}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    `;
+                    taskList.appendChild(li);
+                });
             }
         }
 
-        // Загрузить задачи
-        async function loadTasks() {
-            const transaction = db.transaction(['tasks'], 'readonly');
-            const store = transaction.objectStore('tasks');
-            const request = store.getAll();
-
-            request.onsuccess = () => {
-                let tasks = request.result;
-                
-                // Фильтрация
-                if (currentFilter === 'active') {
-                    tasks = tasks.filter(t => !t.completed);
-                } else if (currentFilter === 'completed') {
-                    tasks = tasks.filter(t => t.completed);
-                }
-
-                // Сортировка по дедлайну
-                tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
-                displayTasks(tasks);
-                updateStats(request.result);
-            };
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+            
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
         }
 
-        // Отобразить задачи
-        function displayTasks(tasks) {
-            const container = document.getElementById('tasksList');
-            
-            if (tasks.length === 0) {
-                container.innerHTML = '<div class="empty-state">Нет задач</div>';
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // --- CONFETTI ENGINE (Pure JS, Lightweight) ---
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function fireConfetti() {
+            const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
+            // Create particles from center
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 1) * 20,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 100,
+                    gravity: 0.5
+                });
+            }
+            if (!isAnimating) requestAnimationFrame(animateConfetti);
+        }
+
+        let isAnimating = false;
+        function animateConfetti() {
+            if (particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                isAnimating = false;
                 return;
             }
+            isAnimating = true;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            container.innerHTML = tasks.map(task => {
-                const deadline = new Date(task.deadline);
-                const now = new Date();
-                const isOverdue = deadline < now && !task.completed;
-                
-                const dateStr = deadline.toLocaleString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.life -= 1.5;
+                p.size *= 0.98;
 
-                return `
-                    <div class="task-item ${task.completed ? 'completed' : ''}">
-                        <input type="checkbox" class="task-checkbox" 
-                            ${task.completed ? 'checked' : ''} 
-                            onchange="toggleTask(${task.id})">
-                        <div class="task-content">
-                            <div class="task-title">${task.title}</div>
-                            <div class="task-deadline ${isOverdue ? 'overdue' : ''}">
-                                ${isOverdue ? '⚠️ ' : '📅 '}${dateStr}
-                            </div>
-                            ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
-                        </div>
-                        <button class="task-delete" onclick="deleteTask(${task.id})">🗑</button>
-                    </div>
-                `;
-            }).join('');
-        }
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 100;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
 
-        // Обновить статистику
-        function updateStats(tasks) {
-            const active = tasks.filter(t => !t.completed).length;
-            const completed = tasks.filter(t => t.completed).length;
-            document.getElementById('stats').textContent = 
-                `Всего: ${tasks.length} | Активных: ${active} | Завершённых: ${completed}`;
-        }
-
-        // Переключить статус задачи
-        async function toggleTask(id) {
-            const transaction = db.transaction(['tasks'], 'readwrite');
-            const store = transaction.objectStore('tasks');
-            const request = store.get(id);
-
-            request.onsuccess = () => {
-                const task = request.result;
-                task.completed = !task.completed;
-                store.put(task);
-                loadTasks();
-                tg.HapticFeedback.impactOccurred('light');
-            };
-        }
-
-        // Удалить задачу
-        async function deleteTask(id) {
-            tg.showConfirm('Удалить эту задачу?', (confirmed) => {
-                if (confirmed) {
-                    const transaction = db.transaction(['tasks'], 'readwrite');
-                    const store = transaction.objectStore('tasks');
-                    store.delete(id);
-                    loadTasks();
-                    tg.HapticFeedback.notificationOccurred('success');
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
                 }
-            });
+            }
+            requestAnimationFrame(animateConfetti);
         }
-
-        // Установить фильтр
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            loadTasks();
-        }
-
-        // Инициализация
-        initDB().then(() => {
-            loadTasks();
-        }).catch(error => {
-            tg.showAlert('Ошибка инициализации базы данных');
-        });
     </script>
 </body>
 </html>
